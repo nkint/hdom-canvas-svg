@@ -1,10 +1,11 @@
 import { polygon, rect, withAttribs } from '@thi.ng/geom';
 import { mulN2, Vec } from '@thi.ng/vectors';
 import { concat, IDENT23, rotation23, translation23 } from '@thi.ng/matrices';
-import { renderOnce, start } from '@thi.ng/hdom';
+import { start } from '@thi.ng/hdom';
 import { canvas } from '@thi.ng/hdom-canvas';
-import { convertTree } from '@thi.ng/hiccup-svg';
-import { RAD2DEG } from '@thi.ng/math';
+import { convertTree, setPrecision } from '@thi.ng/hiccup-svg';
+
+setPrecision(4);
 
 const state = {
   rotation: 0,
@@ -70,7 +71,6 @@ function doDraw() {
 
 const containerCanvas = document.querySelector('#canvas')!;
 const containerSvg = document.querySelector('#svg1')!;
-const containerSvg2 = document.querySelector('#svg2')!;
 
 start(() => createScene([w, h], 'canvas', doDraw()), {
   root: containerCanvas,
@@ -78,22 +78,7 @@ start(() => createScene([w, h], 'canvas', doDraw()), {
 start(() => createScene([w, h], 'svg', doDraw()), {
   root: containerSvg,
 });
-renderOnce(() => createScene([w, h], 'svg', doDraw()), {
-  root: containerSvg2,
-});
-
-let t: SVGPathElement;
-t = document.querySelector('.triangle-container')!;
 
 setInterval(() => {
   state.rotation += 0.03;
-
-  t.setAttribute(
-    'transform',
-    `
-    translate(${center[0]}, ${center[1]}) 
-    rotate(${state.rotation * RAD2DEG}) 
-    translate(${-center[0]}, ${-center[1]}) 
-    `,
-  );
 }, 100);
