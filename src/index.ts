@@ -1,9 +1,10 @@
 import { polygon, rect, withAttribs } from '@thi.ng/geom';
 import { mulN2, Vec } from '@thi.ng/vectors';
-import { concat, rotation23, translation23 } from '@thi.ng/matrices';
-import { start } from '@thi.ng/hdom';
+import { concat, IDENT23, rotation23, translation23 } from '@thi.ng/matrices';
+import { renderOnce, start } from '@thi.ng/hdom';
 import { canvas } from '@thi.ng/hdom-canvas';
 import { convertTree } from '@thi.ng/hiccup-svg';
+import { RAD2DEG } from '@thi.ng/math';
 
 const state = {
   rotation: 0,
@@ -29,9 +30,12 @@ function createScene(size: Vec, type: 'svg' | 'canvas', _content: any) {
   }
 }
 
-function doDraw(w: number, h: number) {
+const w = 500;
+const h = 250 / 2;
+const center = [w / 2, h / 2];
+
+function doDraw() {
   const { rotation } = state;
-  const center = [w / 2, h / 2];
 
   const trianglePoints = [
     [270.8333333333333, 62.5],
@@ -47,37 +51,49 @@ function doDraw(w: number, h: number) {
   const pivot = center;
   const transformTriangle = concat(
     [],
+    IDENT23,
     translation23([], pivot),
     rotation23([], rotation),
     translation23([], mulN2([], pivot, -1)),
   );
 
-  console.log({ transformTriangle });
+  // console.log({ transformTriangle });
 
   return [
     'g',
     {},
     withAttribs(rect([0, 0], [w, h]), { fill: '#2E3440' }),
     rect([0, 0], [w, h], { fill: 'none', stroke: 'black' }),
-    ['g', { transform: transformTriangle }, poly],
+    ['g', { class: 'triangle-container', transform: transformTriangle }, poly],
   ];
 }
 
-const containerCanvas = document.createElement('div');
-document.body.appendChild(containerCanvas);
-const containerSvg = document.createElement('div');
-document.body.appendChild(containerSvg);
+const containerCanvas = document.querySelector('#canvas')!;
+const containerSvg = document.querySelector('#svg1')!;
+const containerSvg2 = document.querySelector('#svg2')!;
 
-const w = 500;
-const h = 250 / 2;
-
-start(() => createScene([w, h], 'canvas', doDraw(w, h)), {
+start(() => createScene([w, h], 'canvas', doDraw()), {
   root: containerCanvas,
 });
-start(() => createScene([w, h], 'svg', doDraw(w, h)), {
+start(() => createScene([w, h], 'svg', doDraw()), {
   root: containerSvg,
 });
+renderOnce(() => createScene([w, h], 'svg', doDraw()), {
+  root: containerSvg2,
+});
+
+let t: SVGPathElement;
+t = document.querySelector('.triangle-container')!;
 
 setInterval(() => {
   state.rotation += 0.03;
+
+  t.setAttribute(
+    'transform',
+    `
+    translate(${center[0]}, ${center[1]}) 
+    rotate(${state.rotation * RAD2DEG}) 
+    translate(${-center[0]}, ${-center[1]}) 
+    `,
+  );
 }, 100);
