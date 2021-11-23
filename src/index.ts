@@ -1,24 +1,24 @@
-import { polygon, rect, withAttribs } from "@thi.ng/geom";
-import { mulN2, Vec } from "@thi.ng/vectors";
-import { concat, rotation23, translation23 } from "@thi.ng/matrices";
-import { start } from "@thi.ng/hdom";
-import { canvas } from "@thi.ng/hdom-canvas";
-import { convertTree } from "@thi.ng/hiccup-svg";
+import { polygon, rect, withAttribs } from '@thi.ng/geom';
+import { mulN2, Vec } from '@thi.ng/vectors';
+import { concat, rotation23, translation23 } from '@thi.ng/matrices';
+import { start } from '@thi.ng/hdom';
+import { canvas } from '@thi.ng/hdom-canvas';
+import { convertTree } from '@thi.ng/hiccup-svg';
 
 const state = {
   rotation: 0,
   cameraMatrix: [1, 0, 0, 1, 0, 0],
 };
 
-function createScene(size: Vec, type: "svg" | "canvas", _content: any) {
-  const content = ["g", { transform: state.cameraMatrix }, _content];
+function createScene(size: Vec, type: 'svg' | 'canvas', _content: any) {
+  const content = ['g', { transform: state.cameraMatrix }, _content];
 
-  if (type === "canvas") {
+  if (type === 'canvas') {
     return [canvas, { width: size[0], height: size[1] }, content];
-  } else if (type === "svg") {
+  } else if (type === 'svg') {
     const pr = devicePixelRatio ?? 1;
     return [
-      "svg",
+      'svg',
       {
         width: size[0] * pr,
         height: size[1] * pr,
@@ -40,8 +40,8 @@ function doDraw(w: number, h: number) {
   ];
 
   const poly = polygon(trianglePoints, {
-    stroke: "black",
-    fill: "none",
+    stroke: 'white',
+    fill: 'none',
   });
 
   const pivot = center;
@@ -49,30 +49,32 @@ function doDraw(w: number, h: number) {
     [],
     translation23([], pivot),
     rotation23([], rotation),
-    translation23([], mulN2([], pivot, -1))
+    translation23([], mulN2([], pivot, -1)),
   );
 
+  console.log({ transformTriangle });
+
   return [
-    "g",
+    'g',
     {},
-    withAttribs(rect([0, 0], [w, h]), { fill: "#2E3440" }),
-    rect([0, 0], [w, h], { fill: "none", stroke: "black" }),
-    ["g", { transform: transformTriangle }, poly],
+    withAttribs(rect([0, 0], [w, h]), { fill: '#2E3440' }),
+    rect([0, 0], [w, h], { fill: 'none', stroke: 'black' }),
+    ['g', { transform: transformTriangle }, poly],
   ];
 }
 
-const containerCanvas = document.createElement("div");
+const containerCanvas = document.createElement('div');
 document.body.appendChild(containerCanvas);
-const containerSvg = document.createElement("div");
+const containerSvg = document.createElement('div');
 document.body.appendChild(containerSvg);
 
 const w = 500;
 const h = 250 / 2;
 
-start(() => createScene([w, h], "canvas", doDraw(w, h)), {
+start(() => createScene([w, h], 'canvas', doDraw(w, h)), {
   root: containerCanvas,
 });
-start(() => createScene([w, h], "svg", doDraw(w, h)), {
+start(() => createScene([w, h], 'svg', doDraw(w, h)), {
   root: containerSvg,
 });
 
